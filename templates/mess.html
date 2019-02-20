@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<!-- html code is coded in en for english -->
+<html lang="en">
+  <head>
+    <!-- adds utf-8 support for "Ø,Æ,Å" -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Anonymess</title>
+  
+    <!-- element that supports CSS3 -->
+    <style>
+      /* bubble around the messages */
+      div.msg_bbl {
+        background-color: #ddd;
+        padding: 5px 10px;
+        border-radius: 4px;
+        color: #555;
+        margin-bottom: 5px;
+      }
+
+      * {
+        font-family: "Trebuchet MS", Helvetica, sans-serif;
+      }
+
+    /* input username and message */
+    .mess_input {
+     padding: 5px;
+     font-size: 16px;
+     border-width: 1px;
+     border-color: #ffffff;
+     background-color: #FFFFFF;
+     color: #000000;
+     border-style: solid;
+     border-radius: 4px;
+     box-shadow: 0px 0px 5px rgba(66,66,66,.75);
+     text-shadow: -3px 0px 0px rgba(66,66,66,.0);
+    }
+    /* when input selected */
+    .mess_input:focus {
+        outline:none;
+        border-color: #0099ff;
+    }
+    /* hvem cursor is hovering over input field */
+    .mess_input:hover {
+        border-color: #59bcff;
+    }
+
+    /* for error fixes */
+  .container {
+    max-width: 90%;
+    margin: 0 auto;
+  }
+
+  /* logoheader */
+  .mess_logoheader {
+    font-size: 36px;
+    padding-bottom: 20px;
+    color: #bcbcbc;
+  }
+
+  /* button that clears log */
+  .mess_slettlogg {
+	-moz-box-shadow:inset 0px 39px 0px -24px #e67a73;
+	-webkit-box-shadow:inset 0px 39px 0px -24px #e67a73;
+	box-shadow:inset 0px 39px 0px -24px #e67a73;
+	background-color:#e4685d;
+	-moz-border-radius:4px;
+	-webkit-border-radius:4px;
+	border-radius:4px;
+	border:1px solid #ffffff;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Trebuchet MS;
+	font-size:16px;
+	padding:6px 15px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #b23e35;
+}
+/* button that clears log hover*/
+.mess_slettlogg:hover {
+	background-color:#eb675e;
+}
+/* button that clears log selected*/
+.mess_slettlogg:active {
+	position:relative;
+	top:1px;
+}
+/* button that sends messages */
+.mess_sendmld {
+	background-color:#77b55a;
+	-moz-border-radius:4px;
+	-webkit-border-radius:4px;
+	border-radius:4px;
+	border:1px solid #4b8f29;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-size:16px;
+	padding:5px 12px;
+	text-decoration:none;
+}
+/* button that sends messages hover*/
+.mess_sendmld:hover {
+	background-color:#72b352;
+}
+/* button that sends messages selected*/
+.mess_sendmld:active {
+	position:relative;
+}
+/* what happends when there are no messages */
+.no_message {
+  padding-left: 90px;
+  max-width: 1000px;
+  padding-top: 10px;
+}
+
+
+    </style>
+
+  </head>
+  <body>
+   <div class="container">
+     <!-- logo -->
+        <div class="mess_logoheader">Anonymess</div>
+      <div class="col-sm-4">
+        <!-- form of the input fields -->
+        <form action="" method="POST">
+          <b>Skriv inn din melding her</b>
+          <div class="clearfix" style="margin-top: 5px;"></div>
+          <input type="text" class="username form-control mess_input" placeholder="Brukernavn">
+          <div style="padding-top: 5px;"></div>
+          <input type="text" class="message form-control mess_input" placeholder="Melding">
+          <div style="padding-top: 5px;"></div>
+          <!-- sends commads to python flask -->
+          <button type="submit" class="btn btn-success btn-block mess_sendmld"><span class="glyphicon glyphicon-send"></span> Send</button>
+          <!-- clears logs -->
+          <button value="Refresh Page" onClick="window.location.reload()" class="mess_slettlogg">Slett logg</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- what happends when there is no messages -->
+    <div class="no_message">
+      <h1 style='color: #ccc'>Bare vent, det kommer nok en melding snart</h1>
+      <div class="message_holder"></div>
+    </div>
+    <!-- support -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+    <script>
+      // sends information to my console, when users connect and send messages
+      var socket = io.connect( 'http://' + document.domain + ':' + location.port )
+      socket.on( 'connect', function() {
+        socket.emit( 'my event', {
+          data: 'User Connected'
+        } )
+        var form = $( 'form' ).on( 'submit', function( e ) {
+          e.preventDefault()
+          let user_name = $( 'input.username' ).val()
+          let user_input = $( 'input.message' ).val()
+          socket.emit( 'my event', {
+            user_name : user_name,
+            message : user_input
+          } )
+          $( 'input.message' ).val( '' ).focus()
+        } )
+      } )
+
+      // displays messages from users to other users
+      socket.on( 'my response', function( msg ) {
+        console.log( msg )
+        if( typeof msg.user_name !== 'undefined' ) {
+          $( 'h1' ).remove()
+          $( 'div.message_holder' ).append( '<div class="msg_bbl"><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
+        }
+      } )
+    </script>
+
+  </div>
+  </body>
+</html>
