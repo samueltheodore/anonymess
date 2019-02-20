@@ -4,6 +4,7 @@ Anonymess secure messaging app
 ## Getting Started
 
 You will need Python3 with flask.
+CSS based on bootsrap 3.
 
 ### Prerequisites
 
